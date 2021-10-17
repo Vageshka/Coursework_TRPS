@@ -1,4 +1,4 @@
-QT       += core gui
+QT       += core gui printsupport
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -16,16 +16,19 @@ DEFINES += QT_DEPRECATED_WARNINGS
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
+    arrow.cpp \
+    diagramitem.cpp \
+    diagramscene.cpp \
     main.cpp \
     mainwindow.cpp \
-    vertex.cpp
+    paper.cpp
 
 HEADERS += \
+    arrow.h \
+    diagramitem.h \
+    diagramscene.h \
     mainwindow.h \
-    vertex.h
-
-FORMS += \
-    mainwindow.ui
+    paper.h
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

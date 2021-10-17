@@ -1,25 +1,47 @@
-#include "vertex.h"
+#include "diagramitem.h"
 
 #include <QGraphicsSceneMouseEvent>
+#include <QPainter>
 
-#define VERTEX_SIZE QSize(150, 100)
+
+#define DiagramItem_SIZE QSize(150, 100)
 #define RESIZING_RECT_WIDTH 10
-#define MINIMAL_VERTEX_WIDTH 50
-#define MINIMAL_VERTEX_HEIGHT 100
+#define MINIMAL_DiagramItem_WIDTH 50
+#define MINIMAL_DiagramItem_HEIGHT 100
 
-Vertex::Vertex(QGraphicsItem* parentItem, QObject *parent) : QObject(parent), QGraphicsItem(parentItem)
+DiagramItem::DiagramItem(QGraphicsItem* parentItem, QObject *parent) : QObject(parent), QGraphicsItem(parentItem)
 {
-    size = VERTEX_SIZE;
+    size = DiagramItem_SIZE;
     setFlag(ItemIsMovable);
     setFlag(ItemIsSelectable);
 }
 
-QRectF Vertex::boundingRect() const
+
+QRectF DiagramItem::boundingRect() const
 {
-    return QRectF (QPointF(0,0), size.grownBy(QMargins(5,5,5,5)));//.marginsAdded(QMarginsF(5,5,5,5));
+    int half = RESIZING_RECT_WIDTH * 0.5;
+    return QRectF (QPointF(0,0), size.grownBy(QMargins(half, half, half, half)));//.marginsAdded(QMarginsF(5,5,5,5));
 }
 
-void Vertex::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
+void DiagramItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
+{
+    painter->setPen(Qt::black);
+    painter->setBrush(QBrush(Qt::white));
+//    this->isSelected() ? painter->setBrush(Qt::red) : painter->setBrush(Qt::green);
+    if(this->isSelected())
+    {
+        for(int i=Top; i <= BottomRight; i++){
+            painter->drawRect(getResizingRect((ResizingRectPos)i));
+        }
+    }
+
+    painter->drawEllipse(boundingRect()-QMarginsF(5,5,5,5));
+
+    Q_UNUSED(option)
+    Q_UNUSED(widget)
+}
+
+void DiagramItem::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 {
     switch (resizeFlag) {
     case Top:
@@ -52,24 +74,24 @@ void Vertex::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 //        emit ItemPos(top_left_point, event->scenePos());
 }
 
-void Vertex::mousePressEvent(QGraphicsSceneMouseEvent *event)
+void DiagramItem::mousePressEvent(QGraphicsSceneMouseEvent *event)
 {
     for(int i=Top; i <= BottomRight; i++){
-        if(getResizngRect((ResizingRectPos)i).contains(event->pos())) resizeFlag = i;
+        if(getResizingRect((ResizingRectPos)i).contains(event->pos())) resizeFlag = i;
     }
     QGraphicsItem::mousePressEvent(event);
 }
 
-void Vertex::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
+void DiagramItem::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
 {
     resizeFlag = 0;
     QGraphicsItem::mouseReleaseEvent(event);
 }
 
-//Returns a 10x10 square with the appropriate vertex coordinate
-QRectF Vertex::getResizngRect(ResizingRectPos RectPos) const
+//Returns a 10x10 square with the appropriate DiagramItem coordinate
+QRectF DiagramItem::getResizingRect(ResizingRectPos RectPos) const
 {
-    //Vertex rect
+    //DiagramItem rect
 //    QRectF tmpRect = boundingRect();
     //ResingRect size
 //
@@ -99,7 +121,7 @@ QRectF Vertex::getResizngRect(ResizingRectPos RectPos) const
     }
 }
 
-void Vertex::resize(bool changeWidth, bool leftSide, bool changeHeight,
+void DiagramItem::resize(bool changeWidth, bool leftSide, bool changeHeight,
                     bool topSide, QGraphicsSceneMouseEvent *event)
 {
     prepareGeometryChange();
@@ -111,22 +133,22 @@ void Vertex::resize(bool changeWidth, bool leftSide, bool changeHeight,
         double cur_width = prev_width + (leftSide ? -1 : 1)
                 * (event->pos().x()-event->lastPos().x());
 
-        if(cur_width < MINIMAL_VERTEX_WIDTH) {
-            size.setWidth(MINIMAL_VERTEX_WIDTH);
+        if(cur_width < MINIMAL_DiagramItem_WIDTH) {
+            size.setWidth(MINIMAL_DiagramItem_WIDTH);
             //Changing x if leftSide
-            if(leftSide) this->setX(this->x()+prev_width-MINIMAL_VERTEX_WIDTH);
+            if(leftSide) this->setX(this->x()+prev_width-MINIMAL_DiagramItem_WIDTH);
         } else {
             //When new width is valid
             if(leftSide){
-                if(prev_width != MINIMAL_VERTEX_WIDTH || event->scenePos().x() < this->x()){
-                    //If the event is to the left of vertex position
+                if(prev_width != MINIMAL_DiagramItem_WIDTH || event->scenePos().x() < this->x()){
+                    //If the event is to the left of DiagramItem position
                     size.setWidth(cur_width);
                     this->setX(this->x()-(cur_width-prev_width));
                 }
             } else {
-                if(prev_width != MINIMAL_VERTEX_WIDTH ||
+                if(prev_width != MINIMAL_DiagramItem_WIDTH ||
                         event->scenePos().x() > this->x()+prev_width){
-                    //If the event is to the right of vertex position
+                    //If the event is to the right of DiagramItem position
                     size.setWidth(cur_width);
                 }
             }
@@ -142,21 +164,21 @@ void Vertex::resize(bool changeWidth, bool leftSide, bool changeHeight,
         double cur_height = prev_height + (topSide ? -1 : 1)
                 * (event->pos().y()-event->lastPos().y());
 
-        if(cur_height < MINIMAL_VERTEX_HEIGHT){
-            size.setHeight(MINIMAL_VERTEX_HEIGHT);
-            if(topSide) this->setY(this->y()+prev_height-MINIMAL_VERTEX_HEIGHT);
+        if(cur_height < MINIMAL_DiagramItem_HEIGHT){
+            size.setHeight(MINIMAL_DiagramItem_HEIGHT);
+            if(topSide) this->setY(this->y()+prev_height-MINIMAL_DiagramItem_HEIGHT);
         } else{
             //When new height is valid
             if(topSide){
-                if(prev_height != MINIMAL_VERTEX_HEIGHT || event->scenePos().y() < this->y()){
-                    //If the event is upper than vertex position
+                if(prev_height != MINIMAL_DiagramItem_HEIGHT || event->scenePos().y() < this->y()){
+                    //If the event is upper than DiagramItem position
                     size.setHeight(cur_height);
                     this->setY(this->y()-(cur_height-prev_height));
                 }
             } else{
-                if(prev_height != MINIMAL_VERTEX_HEIGHT ||
+                if(prev_height != MINIMAL_DiagramItem_HEIGHT ||
                         event->scenePos().y() > this->y()+prev_height){
-                    //If the event is lower than vertex position
+                    //If the event is lower than DiagramItem position
                     size.setHeight(cur_height);
                 }
             }
@@ -164,3 +186,16 @@ void Vertex::resize(bool changeWidth, bool leftSide, bool changeHeight,
     }
 }
 
+QPixmap DiagramItem::icon() const
+{
+    QPixmap pixmap(250, 250);
+    pixmap.fill(Qt::transparent);
+    QPainter painter(&pixmap);
+    painter.setPen(QPen(Qt::black, 8));
+//    painter.translate(125, 125);
+    QPainterPath path;
+    path.addRect(10, 50, 230, 150);
+    painter.drawPath(path);
+
+    return pixmap;
+}

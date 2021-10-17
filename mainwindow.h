@@ -1,11 +1,14 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+#include <QAction>
+#include <QButtonGroup>
+#include <QGraphicsView>
 #include <QMainWindow>
-
-QT_BEGIN_NAMESPACE
-namespace Ui { class MainWindow; }
-QT_END_NAMESPACE
+#include <QMenu>
+#include <QToolBar>
+#include <QToolBox>
+#include <diagramscene.h>
 
 class MainWindow : public QMainWindow
 {
@@ -13,9 +16,46 @@ class MainWindow : public QMainWindow
 
 public:
     MainWindow(QWidget *parent = nullptr);
-    ~MainWindow();
+
+//private slots:
+//    void sceneScaleChanged(const QString &str);
 
 private:
-    Ui::MainWindow *ui;
+    void createActions();
+    void createMenus();
+    void createToolbars();
+    void createToolBox();
+    void setComboCurScale();
+
+    QWidget *createDiagramItemButton(const QString &text, DiagramItem::DiagramType type);
+
+    void opentPreviewDialog();
+
+    QMenu *fileMenu;
+    QMenu *exportMenu;
+    QMenu *aboutMenu;
+
+    QToolBar *fitToolBar;
+    QToolBar *scaleToolBar;
+    QToolBar *currentToolBar;
+    QToolBar *defaultToolBar;
+    QToolBar *textToolBar;
+
+    QAction *createAction;
+    QAction *openAction;
+    QAction *saveAction;
+    QAction *previewAction;
+    QAction *exportPngAction;
+    QAction *exportPdfAction;
+    QAction *aboutAction;
+
+    QComboBox *sceneScaleCombo;
+
+    QToolBox *toolBox;
+    QButtonGroup *buttonGroup;
+
+    DiagramScene *scene;
+    QGraphicsView *view;
+
 };
 #endif // MAINWINDOW_H
