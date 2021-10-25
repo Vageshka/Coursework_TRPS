@@ -93,8 +93,9 @@ void MainWindow::createToolbars()
     QToolButton *fitWidthButton = new QToolButton;
     fitWidthButton->setIcon(QIcon("./assets/fitWidth.png"));
     connect(fitWidthButton, &QToolButton::clicked, this, [&] {
-        view->fitInView(scene->paper->rect().
-                        adjusted(-50,-50,50,50-scene->paper->rect().height()),
+        view->fitInView(scene->paper->rect()
+                        .adjusted(0,0,50,-2*scene->paper->rect().height()/3)
+                        .normalized(),
                         Qt::KeepAspectRatio);
         setComboCurScale();
     });
@@ -147,52 +148,69 @@ void MainWindow::createToolbars()
     QToolButton *cursorButton = new QToolButton;
     cursorButton->setCheckable(true);
     cursorButton->setChecked(true);
+
     cursorButton->setIcon(QIcon(":/assets/cursor.png"));
-//    connect(cursorButton, &QToolButton::clicked, this, [&] {
 
-//    });
-    QToolButton *linePointerButton = new QToolButton;
-    linePointerButton->setCheckable(true);
-    linePointerButton->setIcon(QIcon("C:/Users/Daniil/Documents/Coursework_TRPS/assets/diagonal-line-icon.png"));
-//    connect(linePointerButton, &QToolButton::clicked, this, [&] {
-//                                                            this->view->scale(0.8, 0.8);
-//                                                         });
+    QToolButton *lineButton = new QToolButton;
+    lineButton->setCheckable(true);
+    lineButton->setIcon(QIcon("C:/Users/Daniil/Documents/Coursework_TRPS/assets/diagonal-line-icon.png"));
 
-//    pointerTypeGroup = new QButtonGroup(this);
-//    pointerTypeGroup->addButton(pointerButton, int(DiagramScene::MoveItem));
-//    pointerTypeGroup->addButton(linePointerButton, int(DiagramScene::InsertLine));
-//    connect(pointerTypeGroup, QOverload<QAbstractButton *>::of(&QButtonGroup::buttonClicked),
-//            this, &MainWindow::pointerGroupClicked);
-
+    actionTypeGroup = new QButtonGroup(this);
+    actionTypeGroup->addButton(cursorButton, int(DiagramScene::MoveItem));
+    actionTypeGroup->addButton(lineButton, int(DiagramScene::AddArrow));
+    actionTypeGroup->setExclusive(true);
+    connect(actionTypeGroup, QOverload<QAbstractButton *>::of(&QButtonGroup::buttonClicked),
+            this, [&](QAbstractButton *button) {
+        if(auto checked = buttonGroup->checkedButton()) {
+            buttonGroup->setExclusive(false);
+            checked->setChecked(false);
+            buttonGroup->setExclusive(true);
+        }
+        scene->setState(static_cast<DiagramScene::Mode>(actionTypeGroup->id(button)));
+    });
 
     defaultToolBar = addToolBar(tr("Pointer type"));
     defaultToolBar->addWidget(cursorButton);
-    defaultToolBar->addWidget(linePointerButton);
+    defaultToolBar->addWidget(lineButton);
 //    defaultToolBar->addWidget(sceneScaleCombo);
 }
 
 void MainWindow::createToolBox()
 {
     buttonGroup = new QButtonGroup(this);
-    buttonGroup->setExclusive(false);
-//    connect(buttonGroup, QOverload<QAbstractButton *>::of(&QButtonGroup::buttonClicked),
-//            this, &MainWindow::buttonGroupClicked);
-    QGridLayout *layout = new QGridLayout;
-//    layout->addWidget(createCellWidget(tr("Conditional"), DiagramItem::Conditional), 0, 0);
-    layout->addWidget(createDiagramItemButton(tr("Process"), DiagramItem::X/*Step*/),0, 1);
-//    layout->addWidget(createCellWidget(tr("Input/Output"), DiagramItem::Io), 1, 0);
+    buttonGroup->setExclusive(true);
 
-//    QToolButton *textButton = new QToolButton;
-//    textButton->setCheckable(true);
-//    buttonGroup->addButton(textButton, InsertTextButton);
-//    textButton->setIcon(QIcon(QPixmap(":/images/textpointer.png")));
-//    textButton->setIconSize(QSize(50, 50));
-//    QGridLayout *textLayout = new QGridLayout;
-//    textLayout->addWidget(textButton, 0, 0, Qt::AlignHCenter);
-//    textLayout->addWidget(new QLabel(tr("Text")), 1, 0, Qt::AlignCenter);
-//    QWidget *textWidget = new QWidget;
-//    textWidget->setLayout(textLayout);
-//    layout->addWidget(textWidget, 1, 1);
+    QGridLayout *layout = new QGridLayout;
+    int colrow = 0;
+
+    for(int type=DiagramItem::begin; type<=DiagramItem::end; type++) {
+        switch (type) {
+        case DiagramItem::Regular: {
+            for(int subtype = RegularVertex::begin;
+                    subtype <= RegularVertex::end; subtype++) {
+                RegularVertex item((RegularVertex::VertexType)subtype);
+                layout->addWidget(createToolBoxButton(item, type*1000+subtype),
+                                    colrow/2, colrow % 2);
+                colrow++;
+            }
+            break;
+        }
+        case DiagramItem::Container: {
+            break;
+        }
+        }
+    }
+    connect(buttonGroup, QOverload<QAbstractButton *>::of(&QButtonGroup::buttonClicked),
+            this, [&](QAbstractButton *button) {
+        if(auto checked = actionTypeGroup->checkedButton()) {
+            actionTypeGroup->setExclusive(false);
+            checked->setChecked(false);
+            actionTypeGroup->setExclusive(true);
+        }
+
+        scene->setState(DiagramScene::AddItem);
+        scene->setItemTypeFlags(buttonGroup->id(button));
+    });
 
     layout->setRowStretch(3, 10);
     layout->setColumnStretch(2, 10);
@@ -233,25 +251,17 @@ void MainWindow::setComboCurScale()
                                         view->transform().m11()*100, 'f', 1 )+"%");
 }
 
-QWidget *MainWindow::createDiagramItemButton(const QString &text, DiagramItem::DiagramType type)
+QToolButton *MainWindow::createToolBoxButton(DiagramItem &item, int id)
 {
-    DiagramItem item;
     QIcon icon(item.icon());
 
     QToolButton *button = new QToolButton;
     button->setIcon(icon);
     button->setIconSize(QSize(50, 50));
     button->setCheckable(true);
-    buttonGroup->addButton(button, int(type));
+    buttonGroup->addButton(button, id);
 
-    QGridLayout *layout = new QGridLayout;
-    layout->addWidget(button, 0, 0, Qt::AlignHCenter);
-    layout->addWidget(new QLabel(text), 1, 0, Qt::AlignCenter);
-
-    QWidget *widget = new QWidget;
-    widget->setLayout(layout);
-
-    return widget;
+    return button;
 }
 
 void MainWindow::opentPreviewDialog()

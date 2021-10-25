@@ -27,7 +27,7 @@ private:
     void createToolBox();
     void setComboCurScale();
 
-    QWidget *createDiagramItemButton(const QString &text, DiagramItem::DiagramType type);
+    QToolButton *createToolBoxButton(DiagramItem &item, int id);
 
     void opentPreviewDialog();
 
@@ -40,6 +40,8 @@ private:
     QToolBar *currentToolBar;
     QToolBar *defaultToolBar;
     QToolBar *textToolBar;
+
+    QButtonGroup *actionTypeGroup;
 
     QAction *createAction;
     QAction *openAction;

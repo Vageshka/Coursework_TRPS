@@ -21,14 +21,16 @@ SOURCES += \
     diagramscene.cpp \
     main.cpp \
     mainwindow.cpp \
-    paper.cpp
+    paper.cpp \
+    regularvertex.cpp
 
 HEADERS += \
     arrow.h \
     diagramitem.h \
     diagramscene.h \
     mainwindow.h \
-    paper.h
+    paper.h \
+    regularvertex.h
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

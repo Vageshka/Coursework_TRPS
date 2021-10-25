@@ -2,43 +2,51 @@
 
 #include <QGraphicsSceneMouseEvent>
 #include <QPainter>
-
+#include <QDebug>
 
 #define DiagramItem_SIZE QSize(150, 100)
 #define RESIZING_RECT_WIDTH 10
 #define MINIMAL_DiagramItem_WIDTH 50
 #define MINIMAL_DiagramItem_HEIGHT 100
 
-DiagramItem::DiagramItem(QGraphicsItem* parentItem, QObject *parent) : QObject(parent), QGraphicsItem(parentItem)
+DiagramItem::DiagramItem(ItemType t, QGraphicsItem* parentItem, QObject *parent)
+    : QObject(parent), QGraphicsItem(parentItem), type(t)
 {
     size = DiagramItem_SIZE;
     setFlag(ItemIsMovable);
     setFlag(ItemIsSelectable);
+    setZValue(1000);
 }
-
 
 QRectF DiagramItem::boundingRect() const
 {
-    int half = RESIZING_RECT_WIDTH * 0.5;
-    return QRectF (QPointF(0,0), size.grownBy(QMargins(half, half, half, half)));//.marginsAdded(QMarginsF(5,5,5,5));
+    double addition = RESIZING_RECT_WIDTH * 0.5 +
+            Pen().widthF() + 2;
+    return QRectF (QPointF(0,0), size).marginsAdded(QMargins(
+                                                        addition, addition,
+                                                        addition, addition));
 }
 
-void DiagramItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
+QPainterPath DiagramItem::shape() const
 {
-    painter->setPen(Qt::black);
-    painter->setBrush(QBrush(Qt::white));
-//    this->isSelected() ? painter->setBrush(Qt::red) : painter->setBrush(Qt::green);
-    if(this->isSelected())
-    {
+    QPainterPath path;
+    if(isSelected()){
         for(int i=Top; i <= BottomRight; i++){
-            painter->drawRect(getResizingRect((ResizingRectPos)i));
+            path.addRect((getResizingRect((ResizingRectPos)i)));
         }
     }
 
-    painter->drawEllipse(boundingRect()-QMarginsF(5,5,5,5));
+    return path;
+}
 
-    Q_UNUSED(option)
-    Q_UNUSED(widget)
+void DiagramItem::drawResizingRects(QPainter *painter)
+{
+    painter->setBrush(QBrush(QColor(135, 206, 250)));
+    painter->setPen(QPen(QBrush(Qt::black), 2));
+
+    for(int i=Top; i <= BottomRight; i++){
+        painter->drawRect(getResizingRect((ResizingRectPos)i));
+    }
 }
 
 void DiagramItem::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
@@ -70,8 +78,8 @@ void DiagramItem::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
         break;
     default: QGraphicsItem::mouseMoveEvent(event);
     }
-    emit Changed();
-//        emit ItemPos(top_left_point, event->scenePos());
+
+    updateArrows();
 }
 
 void DiagramItem::mousePressEvent(QGraphicsSceneMouseEvent *event)
@@ -88,36 +96,39 @@ void DiagramItem::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
     QGraphicsItem::mouseReleaseEvent(event);
 }
 
+void DiagramItem::updateArrows()
+{
+//    for(auto arrow : arrows) {
+//        arrow->updatePosition();
+//    }
+}
+
 //Returns a 10x10 square with the appropriate DiagramItem coordinate
 QRectF DiagramItem::getResizingRect(ResizingRectPos RectPos) const
 {
-    //DiagramItem rect
-//    QRectF tmpRect = boundingRect();
-    //ResingRect size
-//
+    int half = RESIZING_RECT_WIDTH * 0.5;
     switch(RectPos) {
         case Top:
-//            return QRectF(tmpRect.center().x()-5, tmpRect.top(), RESIZING_RECT_WIDTH,
-//                          RESIZING_RECT_WIDTH);
-            return QRectF(size.width()/2, 0, RESIZING_RECT_WIDTH, RESIZING_RECT_WIDTH);
+            return QRectF(size.width()*0.5-half, -half,
+                          RESIZING_RECT_WIDTH, RESIZING_RECT_WIDTH);
         case Left:
-//            return QRectF(tmpRect.left(), tmpRect.center().y()-5, RESIZING_RECT_WIDTH,
-//                          RESIZING_RECT_WIDTH);
-            return QRectF(0, size.height()/2, RESIZING_RECT_WIDTH, RESIZING_RECT_WIDTH);
+            return QRectF(-half, size.height()*0.5-half,
+                          RESIZING_RECT_WIDTH, RESIZING_RECT_WIDTH);
         case Right:
-            return QRectF(size.width(), size.height()/2, RESIZING_RECT_WIDTH,
-                          RESIZING_RECT_WIDTH);
+            return QRectF(size.width()-half, size.height()*0.5-half,
+                          RESIZING_RECT_WIDTH, RESIZING_RECT_WIDTH);
         case Bottom:
-            return QRectF(size.width()/2, size.height(), RESIZING_RECT_WIDTH,
-                          RESIZING_RECT_WIDTH);
+            return QRectF(size.width()*0.5-half, size.height()-half,
+                          RESIZING_RECT_WIDTH, RESIZING_RECT_WIDTH);
         case TopLeft:
-            return QRectF(0, 0, RESIZING_RECT_WIDTH, RESIZING_RECT_WIDTH);
+            return QRectF(-half, -half, RESIZING_RECT_WIDTH, RESIZING_RECT_WIDTH);
         case TopRight:
-            return QRectF(size.width(), 0, RESIZING_RECT_WIDTH, RESIZING_RECT_WIDTH);
+            return QRectF(size.width()-half, -half, RESIZING_RECT_WIDTH, RESIZING_RECT_WIDTH);
         case BottomLeft:
-            return QRectF(0, size.height(), RESIZING_RECT_WIDTH, RESIZING_RECT_WIDTH);
+            return QRectF(-half, size.height()-half, RESIZING_RECT_WIDTH, RESIZING_RECT_WIDTH);
         case BottomRight:
-            return QRectF(size.width(), size.height(), RESIZING_RECT_WIDTH, RESIZING_RECT_WIDTH);
+            return QRectF(size.width()-half, size.height()-half,
+                          RESIZING_RECT_WIDTH, RESIZING_RECT_WIDTH);
     }
 }
 
@@ -186,16 +197,16 @@ void DiagramItem::resize(bool changeWidth, bool leftSide, bool changeHeight,
     }
 }
 
-QPixmap DiagramItem::icon() const
-{
-    QPixmap pixmap(250, 250);
-    pixmap.fill(Qt::transparent);
-    QPainter painter(&pixmap);
-    painter.setPen(QPen(Qt::black, 8));
-//    painter.translate(125, 125);
-    QPainterPath path;
-    path.addRect(10, 50, 230, 150);
-    painter.drawPath(path);
+//QPixmap DiagramItem::icon() const
+//{
+//    QPixmap pixmap(250, 250);
+//    pixmap.fill(Qt::transparent);
+//    QPainter painter(&pixmap);
+//    painter.setPen(QPen(Qt::black, 8));
+////    painter.translate(125, 125);
+//    QPainterPath path;
+//    path.addRect(10, 50, 230, 150);
+//    painter.drawPath(path);
 
-    return pixmap;
-}
+//    return pixmap;
+//}

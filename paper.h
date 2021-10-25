@@ -21,9 +21,10 @@ public:
     };
 
     Paper(PaperSize size = A4, PaperOrientation orientation = Portrait);
+
     void setSize(PaperSize size) { pSize = size; updateRect(); }
-    PaperSize size() const { return pSize; }
     void setOrientation(PaperOrientation orientation) { pOrientation = orientation; updateRect(); }
+    PaperSize size() const { return pSize; }
     PaperOrientation orientation() const { return pOrientation; }
 
 protected:
