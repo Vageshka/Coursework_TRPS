@@ -26,6 +26,7 @@ public:
     void setOrientation(PaperOrientation orientation) { pOrientation = orientation; updateRect(); }
     PaperSize size() const { return pSize; }
     PaperOrientation orientation() const { return pOrientation; }
+    static PaperSize strToPaperSize(const QString& str);
 
 protected:
     void updateRect();

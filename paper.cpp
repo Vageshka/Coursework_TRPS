@@ -9,7 +9,26 @@ Paper::Paper(PaperSize size, PaperOrientation orientation) :
 
     setBrush(QBrush(Qt::white));
 //    QGraphicsDropShadowEffect *shadow = new QGraphicsDropShadowEffect();
-//    this->setGraphicsEffect(shadow);
+    //    this->setGraphicsEffect(shadow);
+}
+
+Paper::PaperSize Paper::strToPaperSize(const QString &str)
+{
+    if(str == "A0") {
+        return A0;
+    }
+    if(str == "A1") {
+        return A1;
+    }
+    if(str == "A2") {
+        return A2;
+    }
+
+    if(str == "A3") {
+        return A3;
+    }
+
+    return A4;
 }
 
 //Setting rectangle size

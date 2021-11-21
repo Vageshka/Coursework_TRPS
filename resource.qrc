@@ -1,0 +1,15 @@
+<RCC>
+    <qresource prefix="/">
+        <file>assets/cursor.png</file>
+        <file>assets/diagonal_arrow.png</file>
+        <file>assets/fit_page.png</file>
+        <file>assets/fit_width.png</file>
+        <file>assets/minus-button.png</file>
+        <file>assets/plus-button.png</file>
+        <file>assets/trash.png</file>
+        <file>assets/bold.png</file>
+        <file>assets/italics.png</file>
+        <file>assets/underlined-text.png</file>
+        <file>assets/color-text.png</file>
+    </qresource>
+</RCC>

@@ -19,27 +19,32 @@ public:
         BottomLeft, BottomRight
     };
     enum ItemType {
-        begin,
-        Regular = begin,
+        Regular, begin = Regular,
         Container,
         end = Container
     };
 
-//    enum DiagramType { X };
-
     DiagramItem(ItemType type, QGraphicsItem* parentItem = nullptr, QObject *parent = nullptr);
-    void setSize(const QSizeF &size) { this->size = size; };
-    void setText(const QString &text) { this->text = text; };
-    void setBrush(const QBrush &brush) { this->brush = brush; };
-    void setPen(const QPen &pen) { this->pen = QPen(pen); };
-//    void addArrow(Arrow *arr);
-//    void removeArrow(Arrow *arr);
+    void setSize(const QSizeF &size);
+    void setWidth(double w);
+    void setHeight(double h);
+    void setText(const QString &text) { prepareGeometryChange(); text_ = text; };
+    void setBrush(const QBrush &brush) { prepareGeometryChange(); this->brush = brush; };
+    void setPen(const QPen &pen) { prepareGeometryChange(); this->pen = QPen(pen); };
+    void setFont(const QFont &f) { prepareGeometryChange(); font_ = f; }
+    void setTextColor(const QColor& color) { textColor_ = color; };
 
-    const QSizeF& Size() const { return size; };
-    const QString& Text() const { return text; };
+    const QSizeF& Size() const { return size_; };
+    const QString& Text() const { return text_; };
     const QBrush& Brush() const { return brush; };
     const QPen& Pen() const { return pen; };
     QPointF centerPos() const { return mapToScene(boundingRect().center()); }
+    const QFont& font() const { return font_; }
+    const QColor& textColor() const {return textColor_;}
+    const QPolygonF& itemPolygon() const { return poly_; }
+    ItemType itemType() const { return type_; }
+    virtual int itemSubtype() const { return subtype_; }
+
 
     virtual QPixmap icon() = 0;
 
@@ -50,7 +55,7 @@ public:
 
 protected:
     virtual void paint(QPainter * painter, const QStyleOptionGraphicsItem * option,
-                       QWidget * widget = 0) = 0;
+                       QWidget * widget = 0) override = 0;
 
     void drawResizingRects(QPainter *painter);
 
@@ -61,15 +66,20 @@ protected:
     void mouseMoveEvent(QGraphicsSceneMouseEvent * event) override;
     void mousePressEvent(QGraphicsSceneMouseEvent *event) override;
     void mouseReleaseEvent(QGraphicsSceneMouseEvent *event) override;
-    void updateArrows();
+    void setPolygon(const QPolygonF& poly) { poly_ = poly; }
+    virtual void updatePolygon() = 0;
+    void setSubtype(int subtype) { subtype_ = subtype; }
 
 private:
-//    QVector<Arrow *> arrows;
-    ItemType type;
-    QSizeF size;
-    QString text;
+    ItemType type_;
+    int subtype_;
+    QSizeF size_;
+    QString text_;
+    QFont font_;
     QBrush brush;
     QPen pen;
+    QColor textColor_;
+    QPolygonF poly_;
 };
 
 #endif // DIAGRAMITEM_H

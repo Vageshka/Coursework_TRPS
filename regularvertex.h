@@ -9,8 +9,9 @@ public:
     enum VertexType {
         begin,
         Process = begin,
-        Data, Terminator,
-        end = Terminator
+        Romb, Data,
+        Terminator, Ellipse,
+        end = Ellipse
     };
 
     RegularVertex(VertexType type, QGraphicsItem* parentItem = nullptr, QObject *parent = nullptr);
@@ -20,9 +21,7 @@ public:
 protected:
     virtual void paint(QPainter * painter, const QStyleOptionGraphicsItem * option,
                        QWidget * widget = 0) override;
-
-private:
-    VertexType vType;
+    virtual void updatePolygon() override;
 };
 
 #endif // REGULARVERTEX_H

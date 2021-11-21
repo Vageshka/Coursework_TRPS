@@ -1,0 +1,7 @@
+<RCC>
+    <qresource prefix="/assets">
+        <file>assets/cursor.png</file>
+        <file>assets/diagonal-line-icon.png</file>
+        <file>assets/icon-cursors.jpg</file>
+    </qresource>
+</RCC>

@@ -17,10 +17,17 @@ public:
 
     explicit DiagramScene(QObject *parent = nullptr);
     void setState(Mode state = MoveItem) { this->state = state; };
-    void setItemTypeFlags(unsigned int flags) { itemTypeFlags = flags; };
+    void setItemType(DiagramItem::ItemType type) { itemType_ = type; }
+    void setItemSubtype(int subtype) { itemSubtype_ = subtype; }
+    void setArrowheadType(Arrow::ArrowheadType type) { headType = type; };
+    void updateArrowsItems();
 
     Mode curState() const { return state; };
-    unsigned int curItemTypeFlags() const { return itemTypeFlags; };
+    QList<DiagramItem *> selectedDiagramItems() const;
+    QList<Arrow *> selectedArrows() const;
+    QList<DiagramItem *> diagramItems() const;
+    QList<Arrow *> arrows() const;
+    bool isClear();
 
 signals:
 
@@ -29,14 +36,16 @@ protected:
     void mouseMoveEvent(QGraphicsSceneMouseEvent *event) override;
     void mouseReleaseEvent(QGraphicsSceneMouseEvent *event) override;
 
-    DiagramItem *newItem();
-    bool itemTypeFlagsValid();
-
 private:
     Mode state;
-    unsigned int itemTypeFlags;
     QGraphicsLineItem *dashLine;
+    QPointF origPoint;
+    QGraphicsRectItem *selectingRect;
     DiagramItem *firstItem;
+    Arrow::ArrowheadType headType;
+    QColor textColor_;
+    DiagramItem::ItemType itemType_;
+    int itemSubtype_;
 };
 
 #endif // DIAGRAMSCENE_H

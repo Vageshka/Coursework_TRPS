@@ -17,22 +17,35 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 SOURCES += \
     arrow.cpp \
+    delegatefactory.cpp \
+    dgrmreaderwriter.cpp \
     diagramitem.cpp \
     diagramscene.cpp \
     main.cpp \
     mainwindow.cpp \
     paper.cpp \
-    regularvertex.cpp
+    regularvertex.cpp \
+    regularvertexfactory.cpp
 
 HEADERS += \
     arrow.h \
+    delegatefactory.h \
+    dgrmreaderwriter.h \
     diagramitem.h \
     diagramscene.h \
+    idiagramitemfactory.h \
+    ireaderwriter.h \
     mainwindow.h \
     paper.h \
-    regularvertex.h
+    regularvertex.h \
+    regularvertexfactory.h
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
+
+DISTFILES +=
+
+RESOURCES += \
+    resource.qrc
