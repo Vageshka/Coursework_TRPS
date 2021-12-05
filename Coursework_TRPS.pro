@@ -17,6 +17,7 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 SOURCES += \
     arrow.cpp \
+    arrowfactory.cpp \
     delegatefactory.cpp \
     dgrmreaderwriter.cpp \
     diagramitem.cpp \
@@ -29,6 +30,7 @@ SOURCES += \
 
 HEADERS += \
     arrow.h \
+    arrowfactory.h \
     delegatefactory.h \
     dgrmreaderwriter.h \
     diagramitem.h \

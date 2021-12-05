@@ -1,21 +1,29 @@
 #ifndef DELEGATEFACTORY_H
 #define DELEGATEFACTORY_H
 
-#include <regularvertexfactory.h>
+#include "arrowfactory.h"
+#include "regularvertexfactory.h"
 
-class DelegateFactory : public IDiagramItemFactory
+class DelegateFactory : public IDiagramItemFactory, public ArrowFactory
 {
 public:
     DelegateFactory();
 
-    virtual DiagramItem *create(int subtype) const override;
-    virtual bool subtypeIsValid(int subtype) const override;
+    virtual DiagramItem *createItem(int subtype) const override;
+    virtual bool itemSubtypeIsValid(int subtype) const override;
 
-    bool setFactory(DiagramItem::ItemType type);
-    bool factoryIsSet() const;
+    virtual Arrow *createArrow(QLineF line, DiagramItem *startItem = nullptr,
+                               DiagramItem *endItem = nullptr) const override;
+
+    bool setItemFactory(DiagramItem::ItemType type);
+    bool setArrowFactory(Arrow::ArrowType type);
+
+    bool itemFactoryIsSet() const;
+    bool arrowFactoryIsSet() const;
 
 private:
-    IDiagramItemFactory *factory_;
+    IDiagramItemFactory *di_factory;
+    ArrowFactory *ar_factory;
 };
 
 #endif // DELEGATEFACTORY_H

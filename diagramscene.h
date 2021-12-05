@@ -3,8 +3,7 @@
 
 #include <QGraphicsScene>
 #include <QObject>
-#include "regularvertex.h"
-#include "arrow.h"
+#include "delegatefactory.h"
 #include "paper.h"
 
 class DiagramScene : public QGraphicsScene
@@ -19,6 +18,7 @@ public:
     void setState(Mode state = MoveItem) { this->state = state; };
     void setItemType(DiagramItem::ItemType type) { itemType_ = type; }
     void setItemSubtype(int subtype) { itemSubtype_ = subtype; }
+    void setArrowType(Arrow::ArrowType type) { arrowType_ = type; }
     void setArrowheadType(Arrow::ArrowheadType type) { headType = type; };
     void updateArrowsItems();
 
@@ -42,6 +42,7 @@ private:
     QPointF origPoint;
     QGraphicsRectItem *selectingRect;
     DiagramItem *firstItem;
+    Arrow::ArrowType arrowType_;
     Arrow::ArrowheadType headType;
     QColor textColor_;
     DiagramItem::ItemType itemType_;

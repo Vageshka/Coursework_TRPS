@@ -11,8 +11,9 @@ const int MAX_HEAD_LENGTH = 100;
 const int MAX_HEAD_ARC = 30;
 const int MOVING_CIRCLES_RADIUS = 5;
 
-Arrow::Arrow(QLineF line, DiagramItem *startItem, DiagramItem *endItem, QGraphicsItem *parent) :
-    QGraphicsLineItem(parent), myStartItem(startItem), myEndItem(endItem)
+Arrow::Arrow(ArrowType t, QLineF line, DiagramItem *startItem, DiagramItem *endItem,
+             QGraphicsItem *parent) : QGraphicsLineItem(parent), type_(t),
+                                      myStartItem(startItem), myEndItem(endItem)
 {
     headType = noHead;
     mType = none;
@@ -25,6 +26,12 @@ Arrow::Arrow(QLineF line, DiagramItem *startItem, DiagramItem *endItem, QGraphic
 
     setLine(QLineF( startItem ? startItem->centerPos() : line.p1(),
                     endItem ? endItem->centerPos() : line.p2()));
+}
+
+Arrow::Arrow(QLineF line, DiagramItem *startItem, DiagramItem *endItem, QGraphicsItem *parent)
+                : Arrow(StraightArrow, line, startItem, endItem, parent)
+{
+
 }
 
 QRectF Arrow::boundingRect() const

@@ -34,6 +34,7 @@ public:
     };
 
     struct ArrowPaprams {
+        Arrow::ArrowType type;
         QLineF line;
         int start_item_index;
         int end_item_index;

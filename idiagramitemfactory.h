@@ -6,8 +6,8 @@
 class IDiagramItemFactory
 {
 public:
-    virtual DiagramItem* create(int subtype) const = 0;
-    virtual bool subtypeIsValid(int subtype) const = 0;
+    virtual DiagramItem* createItem(int subtype) const = 0;
+    virtual bool itemSubtypeIsValid(int subtype) const = 0;
 
     virtual ~IDiagramItemFactory() = default;
 };

@@ -2,14 +2,15 @@
 #define REGULARVERTEXFACTORY_H
 
 #include <idiagramitemfactory.h>
+#include <regularvertex.h>
 
 class RegularVertexFactory : public IDiagramItemFactory
 {
 public:
     RegularVertexFactory();
 
-    virtual DiagramItem *create(int subtype) const override;
-    virtual bool subtypeIsValid(int subtype) const override;
+    virtual DiagramItem *createItem(int subtype) const override;
+    virtual bool itemSubtypeIsValid(int subtype) const override;
 };
 
 #endif // REGULARVERTEXFACTORY_H

@@ -25,6 +25,8 @@ public:
     };
 
     DiagramItem(ItemType type, QGraphicsItem* parentItem = nullptr, QObject *parent = nullptr);
+    virtual ~DiagramItem() = default;
+
     void setSize(const QSizeF &size);
     void setWidth(double w);
     void setHeight(double h);

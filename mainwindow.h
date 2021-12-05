@@ -9,9 +9,9 @@
 #include <QMenu>
 #include <QSpinBox>
 #include <QTextEdit>
+#include <QTimer>
 #include <QToolBar>
 #include <QToolBox>
-#include <diagramscene.h>
 #include <ireaderwriter.h>
 
 class MainWindow : public QMainWindow
@@ -26,6 +26,7 @@ private slots:
     void openFile();
     void creatNew();
     void saveAs();
+    void autosave();
 
 private:
     void createActions();
@@ -93,5 +94,7 @@ private:
 
     QString filename_;
     bool sceneIsSaved;
+
+    QTimer *autosaveTimer;
 };
 #endif // MAINWINDOW_H

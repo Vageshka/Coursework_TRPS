@@ -4,7 +4,8 @@
 #include <QGraphicsSceneMouseEvent>
 #include <delegatefactory.h>
 
-DiagramScene::DiagramScene(QObject *parent) : QGraphicsScene(parent)
+DiagramScene::DiagramScene(QObject *parent) : QGraphicsScene(parent),
+                arrowType_(Arrow::StraightArrow), itemType_(DiagramItem::Regular)
 {
     state = MoveItem;
     paper = new Paper();
@@ -111,11 +112,11 @@ void DiagramScene::mousePressEvent(QGraphicsSceneMouseEvent *event)
     }
     case AddItem: {
         DelegateFactory f;
-        qDebug() << f.setFactory(itemType_) << itemType_;
-        if(!f.setFactory(itemType_)) {
+        qDebug() << f.setItemFactory(itemType_) << itemType_;
+        if(!f.setItemFactory(itemType_)) {
             return;
         }
-        auto new_item = f.create(itemSubtype_);
+        auto new_item = f.createItem(itemSubtype_);
         new_item->setPos(event->scenePos());
         new_item->setFont(font());
         addItem(new_item);
@@ -163,8 +164,14 @@ void DiagramScene::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
         DiagramItem *last = dynamic_cast<DiagramItem*>(itemAt(event->scenePos(), transform));
 
         if((dashLine->line().length() > 20) && (!firstItem || firstItem != last)){
-            Arrow *new_arrow = new Arrow(dashLine->line(), firstItem, last);
+            DelegateFactory f;
+            qDebug() << f.setArrowFactory(arrowType_) << arrowType_;
+            if(!f.setArrowFactory(arrowType_)) {
+                return;
+            }
+            auto new_arrow = f.createArrow(dashLine->line(), firstItem, last);
             new_arrow->setArrowhead(headType);
+            qDebug() << new_arrow->arrowType();
 
             addItem(new_arrow);
         }

@@ -32,7 +32,8 @@ IReaderWriter::Status DGRMReaderWriter::write(QString filename, DiagramScene * c
         const auto& arrows = scene->arrows();
         out << arrows.size();
         for(auto arrow : arrows) {
-            out << arrow->line() << (arrow->startItem() ? dItems.indexOf(arrow->startItem()) : -1)
+            out << arrow->arrowType() << arrow->line()
+                << (arrow->startItem() ? dItems.indexOf(arrow->startItem()) : -1)
                 << (arrow->endItem() ? dItems.indexOf(arrow->endItem()) : -1)
                 << arrow->Pen().widthF() << arrow->Pen().color()
                 << arrow->arrowhead() << arrow->arrowheadLength();
@@ -56,6 +57,7 @@ IReaderWriter::Status DGRMReaderWriter::read(QString filename, DiagramScene *out
 
     try {
         QDataStream in(&file);
+        DelegateFactory f;
 
         //Reading paper parametrs
         PaperParams paper_params;
@@ -73,7 +75,10 @@ IReaderWriter::Status DGRMReaderWriter::read(QString filename, DiagramScene *out
             DiagramItem* item;
 
             in >> item_params;
-            item = new RegularVertex(static_cast<RegularVertex::VertexType>(item_params.subtype));
+            if(!f.setItemFactory(item_params.type)) {
+                throw "Error";
+            }
+            item = f.createItem(static_cast<RegularVertex::VertexType>(item_params.subtype));
             item->setPos(item_params.pos);
             item->setSize(item_params.size);
             item->setText(item_params.text);
@@ -92,7 +97,10 @@ IReaderWriter::Status DGRMReaderWriter::read(QString filename, DiagramScene *out
             ArrowPaprams arrow_params;
             Arrow* arrow;
             in >> arrow_params;
-            arrow = new Arrow(arrow_params.line);
+            if(!f.setArrowFactory(arrow_params.type)) {
+                throw "Error";
+            }
+            arrow = f.createArrow(arrow_params.line);
             if(arrow_params.start_item_index != -1) {
                 arrow->setStartItem(dItems[arrow_params.start_item_index]);
             }
@@ -144,7 +152,7 @@ QDataStream &operator<<(QDataStream &stream, const DGRMReaderWriter::ItemPaprams
 
 QDataStream &operator>>(QDataStream &stream, DGRMReaderWriter::ArrowPaprams &params)
 {
-    stream >> params.line >> params.start_item_index
+    stream >> params.type >> params.line >> params.start_item_index
            >> params.end_item_index >> params.pen_width
            >> params.pen_color >> params.head_type
            >> params.head_length;
@@ -153,7 +161,7 @@ QDataStream &operator>>(QDataStream &stream, DGRMReaderWriter::ArrowPaprams &par
 
 QDataStream &operator<<(QDataStream &stream, const DGRMReaderWriter::ArrowPaprams &params)
 {
-    stream << params.line << params.start_item_index
+    stream << params.type << params.line << params.start_item_index
            << params.end_item_index << params.pen_width
            << params.pen_color << params.head_type
            << params.head_length;

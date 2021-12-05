@@ -42,6 +42,10 @@ MainWindow::MainWindow(QWidget *parent)
 
     setCentralWidget(widget);
     setWindowTitle(tr("Redactor"));
+
+    autosaveTimer = new QTimer();
+    autosaveTimer->setInterval(300000);
+    connect(autosaveTimer, &QTimer::timeout, this, &MainWindow::autosave);
 }
 
 void MainWindow::save()
@@ -96,14 +100,16 @@ void MainWindow::creatNew()
             save();
         }
         case QMessageBox::Discard: {
-            updateScene();
             break;
         }
         case QMessageBox::Cancel:
         default:
             return;
         }
-    } else updateScene();
+    }
+    updateScene();
+    filename_="";
+    autosaveTimer->stop();
 }
 
 void MainWindow::saveAs()
@@ -119,6 +125,15 @@ void MainWindow::saveAs()
             filename_ = old_name;
         }
     }
+}
+
+void MainWindow::autosave()
+{
+    if(filename_.isEmpty()) {
+        return;
+    }
+
+    save();
 }
 
 //This method create action for menu bar and tool bar
@@ -718,21 +733,25 @@ void MainWindow::handleReadWriteErrors(IReaderWriter::Status st)
 {
     switch (st) {
     case IReaderWriter::Succes: {
-        sceneIsSaved = false;
+        sceneIsSaved = true;
+        autosaveTimer->start();
         return;
     }
     case IReaderWriter::OpenError: {
         QMessageBox messageBox;
         messageBox.critical(0,"Error","Can't open the file!");
 //        messageBox.setFixedSize(500,200);
+        break;
     }
     case IReaderWriter::ReadError: {
         QMessageBox messageBox;
         messageBox.critical(0,"Error","Something went wrong while reading file.");
+        break;
     }
     case IReaderWriter::WriteError: {
         QMessageBox messageBox;
         messageBox.critical(0,"Error","Something went wrong while writing into file.");
+        break;
     }
     }
 }
@@ -798,7 +817,7 @@ QToolButton *MainWindow::createToolBoxButton(DiagramItem &item, int id)
 QComboBox *MainWindow::createArrowheadsCombo()
 {
     QComboBox *combo = new QComboBox();
-    for(int i = Arrow::begin; i < Arrow::end; i++) {
+    for(int i = Arrow::AHT_begin; i < Arrow::AHT_end; i++) {
         Arrow a(QLine(0, 0, 0, 0));
         combo->addItem(a.arrowheadIcon(static_cast<Arrow::ArrowheadType>(i)), QString::number(i),
                             static_cast<Arrow::ArrowheadType>(i));

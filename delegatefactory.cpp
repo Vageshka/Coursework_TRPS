@@ -1,31 +1,40 @@
 #include "delegatefactory.h"
 
-DelegateFactory::DelegateFactory() : factory_(nullptr) {}
+DelegateFactory::DelegateFactory() : di_factory(nullptr), ar_factory(nullptr) {}
 
-DiagramItem *DelegateFactory::create(int subtype) const
+DiagramItem *DelegateFactory::createItem(int subtype) const
 {
-    if(!factoryIsSet()) {
+    if(!itemFactoryIsSet()) {
         return nullptr;
     }
 
-    return factory_->create(subtype);
+    return di_factory->createItem(subtype);
 }
 
-bool DelegateFactory::subtypeIsValid(int subtype) const
+bool DelegateFactory::itemSubtypeIsValid(int subtype) const
 {
-    return factory_->subtypeIsValid(subtype);
+    return di_factory->itemSubtypeIsValid(subtype);
 }
 
-bool DelegateFactory::setFactory(DiagramItem::ItemType type)
+Arrow *DelegateFactory::createArrow(QLineF line, DiagramItem *startItem, DiagramItem *endItem) const
 {
-    if(factoryIsSet()) {
-        delete factory_;
-        factory_ = nullptr;
+    if(!arrowFactoryIsSet()) {
+        return nullptr;
+    }
+
+    return ar_factory->createArrow(line, startItem, endItem);
+}
+
+bool DelegateFactory::setItemFactory(DiagramItem::ItemType type)
+{
+    if(itemFactoryIsSet()) {
+        delete di_factory;
+        di_factory = nullptr;
     }
 
     switch (type) {
     case DiagramItem::Regular: {
-        factory_ = new RegularVertexFactory;
+        di_factory = new RegularVertexFactory;
         break;
     }
     default: {
@@ -36,7 +45,32 @@ bool DelegateFactory::setFactory(DiagramItem::ItemType type)
     return true;
 }
 
-bool DelegateFactory::factoryIsSet() const
+bool DelegateFactory::setArrowFactory(Arrow::ArrowType type)
 {
-    return factory_;
+    if(arrowFactoryIsSet()) {
+        delete ar_factory;
+        ar_factory = nullptr;
+    }
+
+    switch (type) {
+    case Arrow::StraightArrow: {
+        ar_factory = new ArrowFactory;
+        break;
+    }
+    default: {
+        return false;
+    }
+    }
+
+    return true;
+}
+
+bool DelegateFactory::itemFactoryIsSet() const
+{
+    return di_factory;
+}
+
+bool DelegateFactory::arrowFactoryIsSet() const
+{
+    return ar_factory;
 }
